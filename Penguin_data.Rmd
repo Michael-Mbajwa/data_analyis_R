@@ -1,0 +1,154 @@
+---
+title: "Visualizations of Penguin_dataset"
+author: "Michael Mbajwa"
+date: "11/12/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+# Load useful datasets
+library(palmerpenguins)
+library(tidyverse)
+library(ggplot2)
+```
+
+```{r}
+penguins
+```
+
+```{r}
+# see relation between bill length and bill depth
+penguins %>%
+  ggplot() + 
+  geom_point(mapping = aes(x = bill_length_mm,
+                          y = bill_depth_mm, 
+                          colour = species))
+```
+
+```{r}
+penguins %>%
+  ggplot(aes(y = species)) + 
+  geom_bar(fill = 'grey', colour = 'red')
+```
+
+```{r}
+# See the count of species
+penguins %>%
+  ggplot() + 
+  geom_bar(aes(y = species, fill = sex))
+```
+
+```{r}
+# Let's look at body mass of penguin species
+penguins %>%
+  ggplot() +
+  geom_bar(aes(y = species,
+           fill = body_mass_g > 4000))
+```
+
+```{r}
+# let's look at the relation between bill length and bill depth for different
+# penguin species
+penguins %>%
+  ggplot(aes(x = bill_length_mm,
+                 y = bill_depth_mm,
+                 colour = species)) +
+  geom_point() +
+  geom_smooth(method = 'lm', formula = 'y ~ x')
+```
+
+```{r}
+# let's look at the relation between bill length and bill depth for different
+# penguin species and islands
+penguins %>%
+  ggplot(aes(x = bill_length_mm,
+             y = bill_depth_mm,
+             colour = species,
+             shape = island)) +
+  geom_point(size = 3, alpha = 0.7) +
+  geom_smooth(method = 'lm', formula = 'y ~ x') + 
+  labs(title = 'Bill ration of palmer penguins',
+         caption = 'Horst AM, Hill AP, Gorman KB (2020)',
+         shape = 'Islands',
+         x = 'cumen length (mm)',
+         y = 'cumen depth(mm)')
+```
+
+
+```{r}
+# Let's look at histogram of body mass
+penguins %>%
+  ggplot(aes(x = body_mass_g,
+             fill = species)) +
+  geom_histogram(bins = 35,
+                 alpha = 0.7, 
+                 position = 'identity')
+
+```
+
+```{r}
+penguins %>%
+  ggplot(aes(x = body_mass_g,
+             fill = species,
+             colour = species)) +
+  geom_density(alpha=0.7)
+```
+
+
+```{r}
+# Penguin species by island
+penguins %>%
+  ggplot() +
+  geom_bar(aes(y = species, 
+               fill = island),
+           position = 'dodge') +
+  theme_classic(16)
+```
+
+
+```{r}
+penguins %>%
+  drop_na(sex) %>%
+  ggplot() +
+  geom_bar(aes(y = species,
+               fill = sex),
+           position = 'fill') +
+  scale_x_continuous(labels = scales::percent,
+                     position = 'top',
+                     expand = c(0,0))
+
+```
+
+
+```{r}
+penguins %>%
+  drop_na(sex) %>%
+  ggplot(aes(x = species,
+             y = body_mass_g,
+             fill = sex,
+             colour = sex)) +
+  geom_violin(alpha = 0.1, trim = FALSE) +
+  geom_point(position = position_jitterdodge(dodge.width = 1),
+             alpha = 0.5,
+             show.legend = F)
+```
+
+
+```{r}
+penguins %>%
+  ggplot(aes(x = bill_length_mm,
+             y = bill_depth_mm,
+             colour = body_mass_g)) +
+  geom_point(alpha = 0.6, size = 5) +
+  scale_color_viridis_c()
+```
+
+
+```{r}
+
+```

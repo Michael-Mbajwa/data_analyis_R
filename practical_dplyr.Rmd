@@ -9,10 +9,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 ```
 
-### Judgment
-This short tutorial will allow you to explore `dplyr` functionality based on the previous lecture. Every question can be answered with a combination of `%>%` pipes. You should refrain from using temporary variables and statements outside of the range of the tidyverse.  
-
-##### Import the [data from the website](  https://biostat2.uni.lu/practicals/data/judgments.tsv). 
+##### I import the [data from the website](  https://biostat2.uni.lu/practicals/data/judgments.tsv). 
 ```{r}
 judge_url <- "https://biostat2.uni.lu/practicals/data/judgments.tsv"
 judgments <- readr::read_tsv(judge_url)
@@ -20,25 +17,25 @@ judgments <- readr::read_tsv(judge_url)
 Assign to the name `judgments`
 
 
-##### Use `glimpse()` to identify columns and column types.
+##### I use `glimpse()` to identify columns and column types.
 ```{r}
 glimpse(judgments)
 ```
 
-##### Select all columns that refer to the STAI questionnaire
+##### I select all columns that refer to the STAI questionnaire
 ```{r}
 judgments %>%
   select(starts_with('STAI'))
 ```
 
-##### Select all subjects older than 25
+##### I select all subjects older than 25
 ```{r}
 judgments %>%
   filter(age > 25) %>%
   select (subject)
 ```
 
-##### Retrieve all subjects younger than 20 which are in the stress group
+##### I retrieve all subjects younger than 20 which are in the stress group
 The column for the group is `condition`.
 ```{r}
 judgments %>%
@@ -46,7 +43,7 @@ judgments %>%
   select (subject)
 ```
 
-##### Abbreviate the gender column such that only the first character remains
+##### I abbreviate the gender column such that only the first character remains
 ```{r}
 judgments %>%
   mutate(gender = case_when(
@@ -56,7 +53,7 @@ judgments %>%
   select(subject, age, gender)
 ```
 
-##### Normalize the values in the REI group
+##### I normalize the values in the REI group
 Divide all entries in the REI questionnaire by 5, the maximal value.
 ```{r}
 judgments %>%
@@ -64,8 +61,8 @@ judgments %>%
   select(contains('REI'))
 ```
 
-##### Compute the average and the standard deviation for all moral dilemma columns. 
-The resulting column names must contain the names of "avg" (for the average) and "sd"
+##### I ompute the average and the standard deviation for all moral dilemma columns. 
+The resulting column names contain the names of "avg" (for the average) and "sd"
 for the standard deviation. 
 ```{r}
 judgments %>%
