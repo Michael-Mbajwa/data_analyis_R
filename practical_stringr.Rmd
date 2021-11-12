@@ -1,0 +1,113 @@
+---
+title: "String manipulation"
+author: "Michael Mbajwa"
+date: '2021-10-25'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+> This little tutorial aims to make you familiar with some of the functions of the `stringr` package and a few regular expressions. 
+
+## Strings and escape sequences in R
+
+##### Write a sentence with escape sequences.
+Try the sentence: `"It's the end of the world!" he said.\` . 
+Assign the string to a variable and try as`print()`, `cat()` and `writeLines()`.
+
+```{r}
+str_var <- '"It\'s the end of the world!" he said.\\'
+print(str_var)
+cat('\n')
+cat(str_var)
+cat('\n')
+writeLines(str_var)
+```
+
+## `stringr` functions 
+
+We will be using the `words` data that is built into `stringr`. 
+The data set is available to you if you load the package.
+
+```{r}
+words[1:50]
+length(words)
+str_length(words)[1:20]
+```
+
+
+##### Select words that
+
+1. Contain a `y`
+```{r}
+str_subset(words, 'y')
+```
+
+2. Start with `y`
+```{r}
+str_subset(words, '^y')
+```
+
+
+3. Contain a `y` within the word
+
+```{r}
+str_subset(words, '.y.')
+```
+
+##### Extract the `y` and the previous character.
+
+Note: Use the function `unique()` around the results to avoid printing many empty matches.
+
+```{r}
+unique(str_match(words, '(.{1}y)'))
+```
+
+
+##### Get the lengths of the first ten words
+
+You can use `head(words, 10)` as a convenient way to access the elements of the `words` vector.
+```{r}
+first_ten <- head(words, 10)
+str_length(first_ten)
+```
+
+
+## Viral research 
+
+Read the genome sequence of the Hepatitis D virus: [hepd.fasta](https://biostat2.uni.lu/practicals/data/hepd.fasta).
+For now, just execute the following:
+
+```{r}
+hepd_genome <- readr::read_lines("https://biostat2.uni.lu/practicals/data/hepd.fasta")
+```
+
+##### What is the length of the genome sequence? 
+
+```{r}
+str_length(hepd_genome)
+# Length is 1682
+```
+
+##### What is the sequence composition? How often does each character occur?
+
+```{r}
+seq_comp <- unique(str_split(hepd_genome, '')[[1]])
+seq_comp
+# [1] "A" "T" "G" "C"
+str_count(hepd_genome, seq_comp)
+# [1] 339 354 485 504
+```
+
+
+##### Find motifs in the sequence using `str_locate()`. 
+
+Find all matches of the sequence $ATG$ in the genome sequence. 
+
+```{r}
+str_locate_all(hepd_genome, 'ATG')
+```
+
+
