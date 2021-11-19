@@ -15,6 +15,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(palmerpenguins)
 library(tidyverse)
 library(ggplot2)
+library(hrbrthemes)
 ```
 
 ```{r}
@@ -29,6 +30,7 @@ penguins %>%
                           y = bill_depth_mm, 
                           colour = species))
 ```
+
 
 ```{r}
 penguins %>%
@@ -79,7 +81,6 @@ penguins %>%
          y = 'cumen depth(mm)')
 ```
 
-
 ```{r}
 # Let's look at histogram of body mass
 penguins %>%
@@ -99,7 +100,6 @@ penguins %>%
   geom_density(alpha=0.7)
 ```
 
-
 ```{r}
 # Penguin species by island
 penguins %>%
@@ -109,7 +109,6 @@ penguins %>%
            position = 'dodge') +
   theme_classic(16)
 ```
-
 
 ```{r}
 penguins %>%
@@ -124,7 +123,6 @@ penguins %>%
 
 ```
 
-
 ```{r}
 penguins %>%
   drop_na(sex) %>%
@@ -138,7 +136,6 @@ penguins %>%
              show.legend = F)
 ```
 
-
 ```{r}
 penguins %>%
   ggplot(aes(x = bill_length_mm,
@@ -148,7 +145,82 @@ penguins %>%
   scale_color_viridis_c()
 ```
 
+```{r}
+penguins %>%
+  ggplot(aes(x = bill_length_mm,
+                 y = body_mass_g)) +
+  geom_point() +
+  geom_smooth(method = "lm")
+
+```
+```{r}
+starwars %>%
+  ggplot(aes(x = height,
+             y = mass)) +
+  geom_point(size=2, alpha=0.6)
+```
 
 ```{r}
+# Top 8 species according to gender in star wars
+filter(starwars, !is.na(gender)) %>%
+  ggplot(aes(y = gender,
+             fill = fct_lump_n(species, 5) %>%
+               fct_infreq())) +
+  geom_bar(position = 'fill') +
+  labs(fill = 'top 8 species ranked') +
+  scale_fill_hue()
+```
+```{r}
+# Top 8 species according to gender in star wars - out of order
+filter(starwars, !is.na(gender)) %>%
+  ggplot(aes(y = gender,
+             fill = fct_lump_n(species, 5))) +
+  geom_bar(position = 'fill') +
+  labs(fill = 'top 8 species ranked') +
+  scale_fill_brewer(palette = "Set1")
+```
 
+```{r}
+# Mapping size and color
+penguins %>%
+  ggplot(aes(x=bill_length_mm,
+             y=body_mass_g, 
+             color=body_mass_g,
+             size=body_mass_g)) +
+  geom_point(alpha=0.6) +
+  scale_color_viridis_c() +
+  guides(colour = 'legend')
+```
+
+```{r}
+# Visualizing with multiple grids
+penguins %>%
+  ggplot(aes(x=bill_depth_mm,
+             y=bill_length_mm,
+             color = species)) +
+  geom_point()+
+  facet_wrap(~species, ncol = 3)
+```
+
+```{r}
+penguins %>%
+  ggplot(aes(x=bill_depth_mm,
+             y=bill_length_mm,
+             color = island, 
+             color = species)) +
+  geom_point()+
+  facet_grid(island~species)
+```
+
+```{r}
+penguins %>%
+  ggplot(aes(x=bill_depth_mm,
+             y=bill_length_mm,
+             colour = species)) +
+  geom_point() +
+  facet_grid(island~.) +
+  labs(x='length (mm)', y = 'depth (mm)',
+       title = 'Palmer Penguins',
+       subtitle = 'Bill dimensions over location and species') +
+  scale_fill_ipsum() 
 ```
