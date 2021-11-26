@@ -1,0 +1,162 @@
+---
+title: "dplyr - join and merge"
+author: "Michael Mbajwa"
+date: '2021-11-15'
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r, setup, include = FALSE}
+library(tidyverse)
+```
+
+
+### Judgment
+This short tutorial will allow me to further explore `dplyr` functionality based on  lectures I have had in my Data Science Master's course. 
+
+##### Import the [data from the website](  https://biostat2.uni.lu/practicals/data/judgments.tsv). 
+
+```{r}
+judgments <- read_delim("https://biostat2.uni.lu/practicals/data/judgments.tsv")
+```
+
+##### Identify the moral dilemma with the highest average score across all participants.
+  
+Guideline: The result will be a tibble containing the dilemma in rows(!) and the average such that the dilemma with the highest average in the first row. 
+
+```{r}
+judgments %>%
+  select(contains("moral_dil")) %>% # I first select only columns with dilemma.
+  # The selected tibble is then converted to a long format
+  pivot_longer(contains("moral_dil"),
+               names_to = "dilemma",
+               values_to = "dilemma_val") %>% 
+  group_by(dilemma) %>%
+  # After grouping by the dilemma's, I calculate the average of each dilemma
+  summarise(dilemma_avg = mean(dilemma_val, na.rm = TRUE)) %>%
+  arrange(desc(dilemma_avg)) # The dilemma's are then arranged in highest to lowest using the dilemma_avg column
+```
+
+
+### Genetic variants
+
+##### I will clean the table of genetic *variants* such that all variants appear as a column labeled by their position. 
+The format in the input is the reference allele, the position and the variant, commonly called alternative allele. In `T6G`, `T` is the reference allele, `6` is the position (along the gene) and `G` is the variant allele. 
+```{r}
+variants <- tribble(
+  ~sampleid, ~var1, ~var2, ~var3,
+  "S1", "A3T", "T5G", "T6G",
+  "S2", "A3G", "T5G", NA,
+  "S3", "A3T", "T6C", "G10C",
+  "S4", "A3T", "T6C", "G10C"
+)
+```
+
+Guideline: The table should look something like this.
+
+sampleid |3 | 5 |6
+---------|:-|:-|:-
+S1 | T|G |G
+S2 |G |G |`NA`
+
+
+```{r}
+# THIS GIVES EXACT ANSWER AS STATED IN THE GUIDELINE
+variants %>%
+  # To make the output exact as the question, I first filter out rows that are not S1 or S2. A more robust solution that considers all rows is provided in the next code chunk.
+  filter(sampleid == "S1"|sampleid == "S2")%>%
+  # The tibble is converted to a long format to be easily worked with
+  pivot_longer(contains("var"),
+               names_to = "var",
+               values_to = "allele") %>%
+  # I create two new columns, var and pos. var contains the variant which is usually the last char. So I use str_sub with -1. pos is the position, which is extracted using parse_number.
+  mutate(var = str_sub(allele, -1),
+         pos = parse_number(allele)) %>%
+  # I select the three columns I want to work with
+  select(sampleid, var, pos) %>%
+  # I transform the tibble to a wide format this time
+  pivot_wider(names_from = pos,
+              values_from = var)%>%
+  # I filter out the NA column created as a result of the NA values
+  select(sampleid, 2,3,4)
+```
+```{r}
+# This is the similar but more robust code earlier referred to.
+variants %>%
+  pivot_longer(contains("var"),
+               names_to = "var",
+               values_to = "allele") %>%
+  mutate(var = str_sub(allele, -1),
+         pos = parse_number(allele)) %>%
+  select(sampleid, var, pos) %>%
+  pivot_wider(names_from = pos,
+              values_from = var) %>%
+  select(1:4, 6)
+```
+
+#### Select relevant variants
+
+Genetic variants are labeled according to their effect on stability of the gene product.  
+
+##### I select the subjects in table *variants* that carry variants labeled as *damaging*. 
+The final output would be vector of sample ids.
+
+```{r}
+variant_significance <- tribble(
+  ~variant, ~significance,
+  "A3T", "unknown",
+  "A3G", "damaging",
+  "T5G", "benign",
+  "T6G", "damaging",
+  "T6C", "benign",
+  "G10C", "unknown"
+)
+variant_significance
+```
+
+
+```{r}
+variants %>%
+  # Data is pivoted to the long format.
+  pivot_longer(contains("var"),
+               names_to = "var",
+               values_to = "allele") %>%
+  # I then select the two columns that I will work with
+  select(1,3) %>%
+  # I create a new column that maps the gene code to its significance
+  mutate(sig = case_when(
+    str_detect(allele, "A3T")  ~ "unknown",
+    str_detect(allele, "A3G") ~ "damaging",
+    str_detect(allele, "T5G") ~ "benign",
+    str_detect(allele, "T6G") ~ "damaging",
+    str_detect(allele, "T6C") ~ "benign",
+    str_detect(allele, "G10C") ~ "unknown"
+  )) %>%
+  # I then select rows that have "damaging" under the sig column
+  filter(str_detect(sig, "damaging")) %>%
+  # I select only the sampleid
+  select(sampleid)
+```
+
+
+##### Try using semi-join to achieve the same result. {.bonus}
+
+```{r}
+variants %>%
+  # Pivoting to a long format and storing the result
+  pivot_longer(contains("var"),
+               names_to = "var",
+               values_to = "variant") %>%
+  select(1, 3) -> variants_2
+
+# To make it easier, I select only rows that have damaging under the significance column
+variant_significance %>%
+  filter(str_detect(significance, "damaging")) -> variant_sig
+
+# I then carry out a semi-join with variant as the key
+subj_damag_gene <- semi_join(variants_2, variant_sig, by = "variant") %>%
+  select(sampleid)
+subj_damag_gene
+```
+

@@ -2,6 +2,7 @@
 title: "String manipulation"
 author: "Michael Mbajwa"
 date: '2021-10-25'
+output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
