@@ -169,7 +169,7 @@ filter(starwars, !is.na(gender)) %>%
              fill = fct_lump_n(species, 5) %>%
                fct_infreq())) +
   geom_bar(position = 'fill') +
-  labs(fill = 'top 8 species ranked') +
+  labs(fill = 'top 5 species ranked') +
   scale_fill_hue()
 ```
 ```{r}
@@ -226,3 +226,4 @@ penguins %>%
        subtitle = 'Bill dimensions over location and species') +
   scale_fill_ipsum() 
 ```
+
