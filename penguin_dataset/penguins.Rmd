@@ -1,0 +1,106 @@
+---
+author: "Michael Mbajwa"
+date: "2021-11-19"
+output: html_document
+---
+
+
+> Perform some explanatory analysis on the penguin dataset provided by the palmer penguins package 
+
+
+```{r}
+# Laod required packages
+library(palmerpenguins)
+library(tidyverse)
+library(ggplot2)
+```
+
+```{r}
+# Let's have a quick glimpse of the dataset
+glimpse(penguins)
+```
+
+
+# I would like to plot the body mass on the _y_ axis and the bill length on the _x_ axis.
+
+```{r}
+penguins %>%
+  ggplot(aes(x=bill_length_mm,
+             y=body_mass_g)) +
+  geom_point(aplha=0.7, color = "yellow") +
+  labs(x = 'Bill length (mm)',
+       y = 'Body mass (g)') +
+  theme_dark()
+```
+
+
+# I would plot again the body mass on the _y_ axis and the bill length on the _x_ axis, but different different species with the aid of color.
+
+```{r}
+penguins %>%
+  ggplot(aes(x=bill_length_mm,
+             y=body_mass_g,
+             color=species)) +
+  geom_point(aplha=0.7) +
+  labs(x='Bill length (mm)',
+       y='Bodby mass (g)') +
+  theme_classic() -> penguin_plot
+
+penguin_plot
+```
+
+
+# Let's add a trend line to the above chart
+
+```{r}
+penguin_plot +
+  geom_smooth(method = 'lm', formula = 'y ~ x', se = FALSE)
+```
+
+
+
+# Let's repeat the above plot but this time adding more levels of details (precisely island)
+
+```{r}
+# Write your answer here
+penguins %>%
+  ggplot(aes(x = bill_length_mm,
+                 y = body_mass_g,
+                 colour = species,
+                shape = island)) +
+  geom_point(size=3, alpha=0.6) +
+  geom_smooth(method = 'lm', formula = 'y ~ x', se = FALSE) +
+  scale_color_viridis_d() +
+  theme_bw() +
+  labs(x='Bill length (mm)',
+       y='Bodby mass (g)') +
+  theme_classic()
+```
+
+
+# Let's produce a final grand plot
+
+
+```{r}
+# Write your answer here
+penguins %>%
+  ggplot(aes(x = bill_length_mm,
+                 y = body_mass_g,
+                 colour = species,
+                shape = island)) +
+  geom_point(size=3, alpha=0.7) +
+  geom_smooth(method = 'lm', formula = 'y ~ x', se = FALSE) +
+  scale_color_viridis_d() +
+  theme_bw() +
+  theme(plot.title = element_text(family="sans"),
+        plot.caption = element_text(face = "italic", hjust = 1.5)) +
+  labs(x = 'Bill length (mm)',
+       y = 'Body mass (g)',
+       title = "Penguin bill length and body mass",
+       subtitle = 'Dimensions for male/female Adelie, Chinstrap and Gentoo Penguins
+       at Palmer Station LTER',
+       shape = 'island',
+       color = 'Penguin species',
+       caption = 'Horst AM, Hill AP, Gorman KB(2020)')
+```
+
