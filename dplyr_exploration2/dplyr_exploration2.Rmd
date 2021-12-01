@@ -61,26 +61,7 @@ S1 | T|G |G
 S2 |G |G |`NA`
 
 
-```{r}
-# THIS GIVES EXACT ANSWER AS STATED IN THE GUIDELINE
-variants %>%
-  # To make the output exact as the question, I first filter out rows that are not S1 or S2. A more robust solution that considers all rows is provided in the next code chunk.
-  filter(sampleid == "S1"|sampleid == "S2")%>%
-  # The tibble is converted to a long format to be easily worked with
-  pivot_longer(contains("var"),
-               names_to = "var",
-               values_to = "allele") %>%
-  # I create two new columns, var and pos. var contains the variant which is usually the last char. So I use str_sub with -1. pos is the position, which is extracted using parse_number.
-  mutate(var = str_sub(allele, -1),
-         pos = parse_number(allele)) %>%
-  # I select the three columns I want to work with
-  select(sampleid, var, pos) %>%
-  # I transform the tibble to a wide format this time
-  pivot_wider(names_from = pos,
-              values_from = var)%>%
-  # I filter out the NA column created as a result of the NA values
-  select(sampleid, 2,3,4)
-```
+
 ```{r}
 # This is the similar but more robust code earlier referred to.
 variants %>%
@@ -92,7 +73,7 @@ variants %>%
   select(sampleid, var, pos) %>%
   pivot_wider(names_from = pos,
               values_from = var) %>%
-  select(1:4, 6)
+  select(-"NA")
 ```
 
 #### Select relevant variants
