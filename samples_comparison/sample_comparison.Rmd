@@ -95,6 +95,28 @@ wings %>%
 ```
 
 
+```{r}
+# Combining the two boxplots
+bp1 <- wings %>%
+  filter(location == "A") %>%
+  ggplot(aes(x = location,
+             y = size)) +
+  geom_boxplot(fill = "#e76f51") +
+  labs(title = "Box plot for Location A") +
+  theme_light()
+
+bp2 <- wings %>%
+  filter(location == "B") %>%
+  ggplot(aes(x = location,
+             y = size)) +
+  geom_boxplot(fill = "#457b9d") +
+  labs(title = "Box plot for location B") +
+  theme_light()
+
+plot_grid(bp1, bp2, nrow = 2)
+```
+
+
 
 ```{r}
 # Observing the box plots, we can see the medians of the two locations appear different.
