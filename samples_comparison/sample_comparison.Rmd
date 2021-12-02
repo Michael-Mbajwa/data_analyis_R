@@ -1,0 +1,174 @@
+---
+author: "Michael Mbajwa"
+date: "2021-11-19"
+output: html_document
+---
+  
+```{r setup, include = FALSE}
+library(tidyverse)
+library(broom)
+library(purrr)
+library(cowplot)
+```
+  
+To practice how to compare samples of a dataset, I am going to use the wings dataset. This dataset contains the measurement of wing length in insects living in 2 different areas.
+
+> Objective: Compare both locations and determine if the insects have different sizes of wings. By _difference_, we mean testing several components of what defines a distribution.
+
+
+
+```{r}
+# Load the `wings` dataset that contains the insect wing length measured in two different locations.
+wings <- read_delim("wings.csv")
+wings
+```
+
+
+```{r}
+
+# Brief summary of our dataset
+# The variables under the `size` column are continuous - because they take real numbered values. The variables under the `location` column on the other hand are categorical.
+```
+
+
+
+```{r}
+# Before doing anything, we would like to have an idea of how much data we are dealing with: globally and per location. How many observations do we have per location?
+
+wings %>%
+  group_by(location) %>%
+  summarise(n_obs = n())
+```
+
+
+
+```{r}
+# Now that we have an idea of how much data we are dealing with, let's represent the densities of our datasets graphically.
+wings %>%
+  filter(location == "A") %>%
+  ggplot(aes(x = size)) +
+  geom_density(fill = "#e76f51", alpha = 0.8) +
+  theme_classic() +
+  labs(title = "Density A",
+       x = "Size",
+       y = "Density") +
+  geom_vline(aes(xintercept = mean(size), colour = "mean"), linetype = "dashed", size = 1) +
+  theme(legend.title = element_blank()) +
+  scale_color_manual(values = c(mean = "black")) -> plot_a
+  
+wings %>%
+  filter(location == "B") %>%
+  ggplot(aes(x = size)) +
+  geom_density(fill = "#457b9d", alpha = 0.8) +
+  theme_classic() +
+  labs(title = "Density B",
+       x = "Size",
+       y = "Density") +
+  geom_vline(aes(xintercept = mean(size)), linetype = "dashed", size = 1) -> plot_b
+
+plot_grid(plot_a, plot_b, nrow = 2)
+```
+
+
+
+```{r}
+# To study the medians of the different locations, we can also use a box plot
+
+wings %>%
+  filter(location == "A") %>%
+  ggplot(aes(x = location,
+             y = size)) +
+  geom_boxplot(fill = "#e76f51") +
+  labs(title = "Box plot for Location A") +
+  theme_light()
+```
+
+
+```{r}
+wings %>%
+  filter(location == "B") %>%
+  ggplot(aes(x = location,
+             y = size)) +
+  geom_boxplot(fill = "#457b9d") +
+  labs(title = "Box plot for location B") +
+  theme_light()
+```
+
+
+
+```{r}
+# Observing the box plots, we can see the medians of the two locations appear different.
+```
+
+
+## NEXT GOAL: Compare the means of the locations.
+
+Before comparing the two means, we need to ensure that both distributions are normal in order to determine which test we should use. 
+
+
+```{r}
+# To test normality, I will use a shapiro test.
+wings %>%
+  nest_by(location) %>%
+  mutate(norm_test = map(data, shapiro.test),
+         tidied = tidy(norm_test)) %>%
+  unnest(tidied)
+```
+
+
+```{r}
+# Observation: From the output of the result, the p-values are > 0.05 implying that the distributions of locations A and B are not significantly different from the normal distribution. We can assume there is strong evidence A and B follow the normal distribution.
+```
+
+Since the samples follow a normal distribution, we will use the t.test() to compare two means.
+
+
+
+Before I perform the t.test, I will test if the variances of the sample are the same because it affects my t.test
+
+```{r}
+
+wings %>%
+  nest_by(location) %>%
+  pivot_wider(names_from = location,
+              values_from = data) %>%
+  mutate(test = tidy(var.test(unlist(A), unlist(B)))) %>%
+  unpack(test)
+
+# Based on the p-value, we can conclude the variances are different between the 2 locations.
+
+# The consequence for the t-test chosen is that we will conduct the test with a welch correction/adjustment.
+```
+```{r}
+# A simple manual test
+wings %>%
+  group_by(location) %>%
+  summarise(variance = var(size),
+            mean = mean(size))
+```
+
+
+
+I will efine $H_0$ for the appropriate test, and then the alternative hypothesis $H_1$.
+
+```{r}
+# H_1 = The means of the two locations are equal.
+# H_1 = The means of the two locations are unequal.
+```
+
+
+I will then perform the t.test
+```{r}
+wings %>%
+  nest_by(location) %>%
+  pivot_wider(names_from = location,
+              values_from = data) -> wings_long
+
+t.test(Pair(unlist(A), unlist(B)) ~ 1, data = wings_long, var.equal = FALSE)
+```
+
+```{r}
+# CONCLUSION
+# Judging from the result of our p-value, we can conclude there is a weak evidence that the means are unequal. This mean the means are not significantly different from each other.
+```
+
