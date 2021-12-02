@@ -155,7 +155,7 @@ wings %>%
   pivot_wider(names_from = location,
               values_from = data) %>%
   mutate(test = tidy(var.test(unlist(A), unlist(B)))) %>%
-  unpack(test)
+  unnest(test)
 
 # Based on the p-value, we can conclude the variances are different between the 2 locations.
 
